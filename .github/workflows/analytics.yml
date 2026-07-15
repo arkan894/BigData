@@ -15,9 +15,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          # Gunakan Personal Access Token agar bisa push kembali ke repo
-          token: ${{ secrets.GH_PAT }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -43,8 +40,12 @@ jobs:
           python analytics_cron.py
 
       - name: Commit and Push Generated Charts
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Set remote URL dengan PAT agar bisa push
+          git remote set-url origin https://x-access-token:${GH_PAT}@github.com/arkan894/BigData.git
           git add .
-          git diff-index --quiet HEAD || (git commit -m "Auto-update generated big data analytics files [skip ci]" && git push)
+          git diff-index --quiet HEAD || (git commit -m "Auto-update generated big data analytics files [skip ci]" && git push origin HEAD)
